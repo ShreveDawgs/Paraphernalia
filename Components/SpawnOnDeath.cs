@@ -20,11 +20,11 @@ public class SpawnOnDeath : MonoBehaviour {
 	}
 
 	void OnEnable () {
-		health.onDeath += Spawn;
+		if (health != null) health.onDeath += Spawn;
 	}
 
 	void OnDisable () {
-		health.onDeath -= Spawn;
+        if (health != null) health.onDeath -= Spawn;
 	}
 
 	void Spawn () {

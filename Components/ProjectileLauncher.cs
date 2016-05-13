@@ -9,6 +9,8 @@ public class ProjectileLauncher : MonoBehaviour {
 	public float launchDelay = 1.5f;
 	public bool showProjectileOnReady = true;
 	public float kickbackForce = 1f;
+    public int projectilesPerShot = 1;
+    [Range(0,180)]public float spread = 0;
 
 	private float launchTime;
 	private List<Projectile> projectilePool = new List<Projectile>();
@@ -18,7 +20,7 @@ public class ProjectileLauncher : MonoBehaviour {
 	}
 
 	Projectile GetNextProjectile () {
-		Projectile projectile = projectilePool.Find((p) => !p.gameObject.activeSelf);
+        Projectile projectile = null;// projectilePool.Find((p) => !p.gameObject.activeSelf);
 		
 		if (projectile == null) {
 			projectile = projectilePrefab.Instantiate() as Projectile;
@@ -30,18 +32,22 @@ public class ProjectileLauncher : MonoBehaviour {
 
 	void Ready () {
 		Projectile[] projectiles = transform.GetChildComponents<Projectile>();
-		if (projectiles.Length == 0 && Time.time - launchTime > launchDelay) {
-			Projectile projectile = GetNextProjectile();
-			projectile.Ready(transform, showProjectileOnReady);
+		if (projectiles.Length < projectilesPerShot && Time.time - launchTime > launchDelay) {
+            for (int i = 0; i < projectilesPerShot; i++) {
+                Projectile projectile = GetNextProjectile();
+                projectile.Ready(transform, showProjectileOnReady);
+            }
 		}
 	}
 
 	public bool Shoot (Vector3 direction, Vector3 parentVelocity = default(Vector3)) {
 		Projectile[] projectiles = transform.GetChildComponents<Projectile>();
 		if (projectiles.Length > 0) {
-			launchTime = Time.time;
-			Projectile projectile = projectiles[0];
-			projectile.Fire(direction, parentVelocity);
+            foreach (Projectile projectile in projectiles) {
+                direction = Quaternion.AngleAxis(Random.Range(-spread, spread), Vector3.forward) * direction;
+                launchTime = Time.time;
+                projectile.Fire(direction, parentVelocity);
+            }
 			return true;
 		}
 		return false;
