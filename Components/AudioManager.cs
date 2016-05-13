@@ -98,13 +98,9 @@ public class AudioManager : MonoBehaviour {
 	public static void PlayEffect(string name, Transform t = null, float volume = 1, float pitch = 1) {
 		if (string.IsNullOrEmpty(name)) return;
 		AudioClip clip = instance.clips.Find(c => c.name == name);
-		PlayEffect(clip, t, volume, pitch);
-	}
-
-	public static void PlayEffect(AudioClip clip, Transform t = null, float volume = 1, float pitch = 1) {
 		PlayEffect(clip, instance.defaultSFXMixer, t, volume, pitch);
 	}
-
+        
 	public static void PlayEffect(string name, string mixerName, Transform t = null, float volume = 1, float pitch = 1) {
 		if (string.IsNullOrEmpty(name)) return;
 		AudioClip clip = instance.clips.Find(c => c.name == name);
@@ -126,6 +122,7 @@ public class AudioManager : MonoBehaviour {
 		source.pitch = pitch;
 		source.clip = clip;
 		source.volume = volume;
+        if (mixer == null) mixer = instance.defaultSFXMixer;
 		source.outputAudioMixerGroup = mixer;
 		source.Play();
 		instance.currentSFXSource = (instance.currentSFXSource + 1) % instance.sfxSourcesCount;
