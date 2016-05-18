@@ -19,6 +19,7 @@ public class HealthController : MonoBehaviour {
 	public event OnLifeChangeEvent onDestruction = delegate {};
 	public event OnLifeChangeEvent onResurection = delegate {};
 
+    public string audioMixerName;
 	public string damageSoundName;
 	public string deathSoundName;
 	public string destructionSoundName;
@@ -47,7 +48,7 @@ public class HealthController : MonoBehaviour {
 					PlayDestruction();
 				}
 				else {
-					AudioManager.PlayVariedEffect(deathSoundName);
+					AudioManager.PlayVariedEffect(deathSoundName, audioMixerName);
 					ParticleManager.Play(deathParticlesName, transform);
 				}
 			}
@@ -55,11 +56,11 @@ public class HealthController : MonoBehaviour {
 				PlayDestruction();
 			}
 			else if (_health > 0 && prevHealth <= 0) {
-				AudioManager.PlayVariedEffect(deathSoundName);
+				AudioManager.PlayVariedEffect(deathSoundName, audioMixerName);
 				onResurection();
 			}
 			else if (_health < prevHealth) {
-				AudioManager.PlayVariedEffect(damageSoundName);
+				AudioManager.PlayVariedEffect(damageSoundName, audioMixerName);
 			}
 			
 			if (prevHealth != _health) {
@@ -70,7 +71,7 @@ public class HealthController : MonoBehaviour {
 	}
 
 	void PlayDestruction () {
-		AudioManager.PlayVariedEffect(destructionSoundName);
+		AudioManager.PlayVariedEffect(destructionSoundName, audioMixerName);
 		ParticleManager.Play(destructionParticlesName, transform.position);
 		GameObject destructionSpawn = Spawner.Spawn(destructionSpawnName);
 		if (destructionSpawn != null) {

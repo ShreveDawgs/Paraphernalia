@@ -91,8 +91,8 @@ public class AudioManager : MonoBehaviour {
 		}
 	}
 
-	public static void PlayVariedEffect(string name) {
-		PlayEffect(name, null, Random.Range(0.9f,1.1f), Random.Range(0.9f,1.1f));
+	public static void PlayVariedEffect(string name, string mixerName = null) {
+		PlayEffect(name, mixerName, null, Random.Range(0.9f,1.1f), Random.Range(0.9f,1.1f));
 	}
 
 	public static void PlayEffect(string name, Transform t = null, float volume = 1, float pitch = 1) {
