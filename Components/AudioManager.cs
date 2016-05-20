@@ -32,8 +32,7 @@ public class AudioManager : MonoBehaviour {
 	public AudioMixerGroup defaultSFXMixer;
 
 	[Range(0,10)] public int sfxSourcesCount = 5;
-	private int currentSFXSource = 0;
-	private AudioSource[] sfxSources;
+	private List<AudioSource> sfxSources = new List<AudioSource>();
 
 	private int currentMusicSource = 0;
 	private AudioSource[] musicSources;
@@ -70,12 +69,11 @@ public class AudioManager : MonoBehaviour {
 	}
 
 	void CreateSFXPool () {
-		sfxSources = new AudioSource[sfxSourcesCount];
 		for (int i = 0; i < sfxSourcesCount; i++) {
 			GameObject go = new GameObject("SFXSource." + i);
 			go.transform.parent = transform;
 			AudioSource sfxSource = go.AddComponent<AudioSource>();
-			sfxSources[i] = sfxSource;
+			sfxSources.Add(sfxSource);
 		}
 	}
 
@@ -93,7 +91,7 @@ public class AudioManager : MonoBehaviour {
 
 	public static void PlayVariedEffect(string name, string mixerName = null) {
 		PlayEffect(name, mixerName, null, Random.Range(0.9f,1.1f), Random.Range(0.9f,1.1f));
-	}
+        }
 
 	public static void PlayEffect(string name, Transform t = null, float volume = 1, float pitch = 1) {
 		if (string.IsNullOrEmpty(name)) return;
@@ -101,15 +99,15 @@ public class AudioManager : MonoBehaviour {
 		PlayEffect(clip, instance.defaultSFXMixer, t, volume, pitch);
 	}
         
-	public static void PlayEffect(string name, string mixerName, Transform t = null, float volume = 1, float pitch = 1) {
+	public static void PlayEffect(string name, string mixerName, Transform t = null, float volume = 1, float pitch = 1, float spatialBlend = 0f, float minDistance = 0f, float maxDistance = 10f) {
 		if (string.IsNullOrEmpty(name)) return;
 		AudioClip clip = instance.clips.Find(c => c.name == name);
 		AudioMixerGroup mixer = instance.mixers.Find(m => m.name == mixerName);
 		if (mixer == null) mixer = instance.defaultSFXMixer;
-		PlayEffect(clip, mixer, t, volume, pitch);
+		PlayEffect(clip, mixer, t, volume, pitch, spatialBlend, minDistance, maxDistance);
 	}
 
-	public static void PlayEffect(AudioClip clip, AudioMixerGroup mixer = null, Transform t = null, float volume = 1, float pitch = 1) {
+        public static void PlayEffect(AudioClip clip, AudioMixerGroup mixer = null, Transform t = null, float volume = 1, float pitch = 1, float spatialBlend = 0f, float minDistance = 0f, float maxDistance = 10f) {
 		if (clip == null) return;
 		int id = clip.GetInstanceID();
 		if (instance.lastPlayed.ContainsKey(id) && 
@@ -117,15 +115,17 @@ public class AudioManager : MonoBehaviour {
 			return;
 		}
 		instance.lastPlayed[id] = Time.time;
-		AudioSource source = instance.sfxSources[instance.currentSFXSource];
+        AudioSource source = instance.sfxSources.Find((a) => !a.isPlaying);
 		if (t != null) source.gameObject.transform.position = t.position;
 		source.pitch = pitch;
 		source.clip = clip;
 		source.volume = volume;
-        if (mixer == null) mixer = instance.defaultSFXMixer;
+        source.spatialBlend = spatialBlend;
+        source.minDistance = minDistance;
+        source.maxDistance = maxDistance;
+            if (mixer == null) mixer = instance.defaultSFXMixer;
 		source.outputAudioMixerGroup = mixer;
 		source.Play();
-		instance.currentSFXSource = (instance.currentSFXSource + 1) % instance.sfxSourcesCount;
 	}
 
 	public static void PlayMusic (AudioClip clip) {
